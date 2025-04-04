@@ -8,7 +8,7 @@ resource "github_actions_organization_secret" "org" {
   for_each        = { for secret in var.secrets : secret.name => secret }
   secret_name     = each.value.name
   visibility      = try(each.value.visibility, "private")
-  plaintext_value = each.value.value
+  encrypted_value = each.value.value
 }
 
 resource "github_actions_organization_variable" "org" {
