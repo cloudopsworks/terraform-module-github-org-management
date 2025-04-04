@@ -11,5 +11,8 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    sodium = {
+      source = "killmeplz/sodium"
+    }
   }
 }
