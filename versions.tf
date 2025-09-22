@@ -9,10 +9,12 @@ terraform {
   # Complete with required providers for the module
   required_providers {
     github = {
-      source = "integrations/github"
+      source  = "integrations/github"
+      version = "~> 6.3"
     }
     sodium = {
-      source = "killmeplz/sodium"
+      source  = "killmeplz/sodium"
+      version = ">= 0.0.3"
     }
   }
 }
