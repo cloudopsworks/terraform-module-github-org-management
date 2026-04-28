@@ -2,13 +2,16 @@
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7 |
+| <a name="requirement_github"></a> [github](#requirement\_github) | ~> 6.0 |
+| <a name="requirement_sodium"></a> [sodium](#requirement\_sodium) | >= 0.0.3 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_github"></a> [github](#provider\_github) | 6.3.0 |
+| <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
+| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | >= 0.0.3 |
 
 ## Modules
 
@@ -22,6 +25,8 @@
 |------|------|
 | [github_actions_organization_secret.org](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_organization_secret) | resource |
 | [github_actions_organization_variable.org](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_organization_variable) | resource |
+| [github_actions_organization_public_key.public_key](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/actions_organization_public_key) | data source |
+| [sodium_encrypted_item.org](https://registry.terraform.io/providers/killmeplz/sodium/latest/docs/data-sources/encrypted_item) | data source |
 
 ## Inputs
 
