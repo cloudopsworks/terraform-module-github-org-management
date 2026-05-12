@@ -1,1 +1,30 @@
-# Module configuration
+# GitHub Organization Management - Module Configuration
+# All values here are module-specific; framework values (org, spoke_def, is_hub, extra_tags)
+# are injected automatically by the Terragrunt hierarchy.
+
+# (Optional) List of GitHub Actions organization-level variables to create.
+# Each entry is an object with the following attributes:
+#   name:       (Required) Name of the variable. Must be unique within the organization.
+#   value:      (Required) Plaintext value for the variable.
+#   visibility: (Optional) Visibility scope. Default: "private".
+#               Valid values: "private" | "selected" | "all"
+variables: []
+# Example:
+# variables:
+#   - name: MY_ORG_VAR        # (Required) Variable name — unique within the org
+#     value: "my-value"       # (Required) Variable value
+#     visibility: private     # (Optional) "private" | "selected" | "all". Default: "private"
+
+# (Optional) List of GitHub Actions organization-level secrets to create.
+# Values are encrypted client-side using libsodium before being sent to the GitHub API.
+# Each entry is an object with the following attributes:
+#   name:       (Required) Name of the secret. Must be unique within the organization.
+#   value:      (Required) Plaintext secret value — encrypted via libsodium before upload.
+#   visibility: (Optional) Visibility scope. Default: "private".
+#               Valid values: "private" | "selected" | "all"
+secrets: []
+# Example:
+# secrets:
+#   - name: MY_ORG_SECRET       # (Required) Secret name — unique within the org
+#     value: "my-secret-value"  # (Required) Plaintext value; encrypted via libsodium before upload
+#     visibility: private       # (Optional) "private" | "selected" | "all". Default: "private"

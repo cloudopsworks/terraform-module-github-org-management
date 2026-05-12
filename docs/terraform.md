@@ -10,8 +10,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
-| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | >= 0.0.3 |
+| <a name="provider_github"></a> [github](#provider\_github) | 6.12.1 |
+| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | 0.0.3 |
 
 ## Modules
 
@@ -35,9 +35,9 @@
 | <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | n/a | `map(string)` | `{}` | no |
 | <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Establish this is a HUB or spoke configuration | `bool` | `false` | no |
 | <a name="input_org"></a> [org](#input\_org) | n/a | <pre>object({<br/>    organization_name = string<br/>    organization_unit = string<br/>    environment_type  = string<br/>    environment_name  = string<br/>  })</pre> | n/a | yes |
-| <a name="input_secrets"></a> [secrets](#input\_secrets) | Secrets for the GitHub Organization | `any` | `[]` | no |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | List of GitHub Actions organization-level secrets to create. Values are encrypted client-side via libsodium. Each entry requires name and value; visibility defaults to 'private'. | `any` | `[]` | no |
 | <a name="input_spoke_def"></a> [spoke\_def](#input\_spoke\_def) | n/a | `string` | `"001"` | no |
-| <a name="input_variables"></a> [variables](#input\_variables) | Variables for the GitHub Organization | `any` | `[]` | no |
+| <a name="input_variables"></a> [variables](#input\_variables) | List of GitHub Actions organization-level variables to create. Each entry requires name and value; visibility defaults to 'private'. | `any` | `[]` | no |
 
 ## Outputs
 
