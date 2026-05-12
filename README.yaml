@@ -3,6 +3,14 @@ name: Terraform GitHub Organization Management
 
 license: "APACHE2"
 
+badges:
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-github-org-management.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-github-org-management/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-github-org-management.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-github-org-management/commits
+
 copyrights:
   - name: "Cloud Ops Works LLC"
     url: "https://cloudops.works"
@@ -11,20 +19,146 @@ copyrights:
 github_repo: cloudopsworks/terraform-module-github-org-management
 
 description: |-
-  GitHub Organization Management
+  Terraform module for managing GitHub Actions organization-level secrets and variables.
+  Supports encrypted secret storage via libsodium and configurable visibility scopes.
 
 # Introduction to the project
 introduction: |-
-#  This is an introduction.
+  This module provisions and manages **GitHub Actions organization-level variables** and
+  **secrets** using the [GitHub Terraform provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
+
+  Secrets are encrypted client-side using [libsodium](https://doc.libsodium.org/) via the
+  `killmeplz/sodium` provider before being uploaded to the GitHub API, ensuring values
+  are never transmitted in plaintext.
+
+  Each variable and secret supports a configurable `visibility` scope (`private`, `selected`,
+  or `all`) to control which repositories within the organization can access them.
 
 # How to use this project
 usage: |-
+  ### Scaffolding a new deployment with Terragrunt
+
+  ```sh
+  # 1. Create and enter the target deployment directory
+  mkdir -p <environment>/<region>/<spoke>/github-org-management
+  cd <environment>/<region>/<spoke>/github-org-management
+
+  # 2. Scaffold the module
+  terragrunt scaffold github.com/cloudopsworks/terraform-module-github-org-management
+
+  # 3. Edit inputs.yaml with deployment-specific values
+  vi inputs.yaml
+
+  # 4. Apply
+  terragrunt apply
+  ```
+
+  #### `inputs.yaml` — annotated example
+
+  ```yaml
+  # (Optional) List of GitHub Actions organization-level variables to create.
+  # Each entry is an object with the following attributes:
+  #   name:       (Required) Name of the variable. Must be unique within the organization.
+  #   value:      (Required) Plaintext value for the variable.
+  #   visibility: (Optional) Visibility scope. Default: "private".
+  #               Valid values: "private" | "selected" | "all"
+  variables: []
+  # Example:
+  # variables:
+  #   - name: MY_ORG_VAR        # (Required) Variable name — unique within the org
+  #     value: "my-value"       # (Required) Variable value
+  #     visibility: private     # (Optional) "private" | "selected" | "all". Default: "private"
+
+  # (Optional) List of GitHub Actions organization-level secrets to create.
+  # Values are encrypted client-side using libsodium before being sent to the GitHub API.
+  # Each entry is an object with the following attributes:
+  #   name:       (Required) Name of the secret. Must be unique within the organization.
+  #   value:      (Required) Plaintext secret value — encrypted via libsodium before upload.
+  #   visibility: (Optional) Visibility scope. Default: "private".
+  #               Valid values: "private" | "selected" | "all"
+  secrets: []
+  # Example:
+  # secrets:
+  #   - name: MY_ORG_SECRET       # (Required) Secret name — unique within the org
+  #     value: "my-secret-value"  # (Required) Plaintext value; encrypted via libsodium before upload
+  #     visibility: private       # (Optional) "private" | "selected" | "all". Default: "private"
+  ```
+
+  #### Generated `terragrunt.hcl`
+
+  ```hcl
+  locals {
+    local_vars  = yamldecode(file("./inputs.yaml"))
+    spoke_vars  = yamldecode(file(find_in_parent_folders("spoke-inputs.yaml")))
+    region_vars = yamldecode(file(find_in_parent_folders("region-inputs.yaml")))
+    env_vars    = yamldecode(file(find_in_parent_folders("env-inputs.yaml")))
+    global_vars = yamldecode(file(find_in_parent_folders("global-inputs.yaml")))
+
+    local_tags  = jsondecode(file("./local-tags.json"))
+    spoke_tags  = jsondecode(file(find_in_parent_folders("spoke-tags.json")))
+    region_tags = jsondecode(file(find_in_parent_folders("region-tags.json")))
+    env_tags    = jsondecode(file(find_in_parent_folders("env-tags.json")))
+    global_tags = jsondecode(file(find_in_parent_folders("global-tags.json")))
+
+    tags = merge(
+      local.global_tags,
+      local.env_tags,
+      local.region_tags,
+      local.spoke_tags,
+      local.local_tags
+    )
+  }
+
+  include "root" {
+    path = find_in_parent_folders("root.hcl")
+  }
+
+  terraform {
+    source = "github.com/cloudopsworks/terraform-module-github-org-management"
+  }
+
+  inputs = {
+    is_hub     = false
+    org        = local.env_vars.org
+    spoke_def  = local.spoke_vars.spoke
+    variables  = try(local.local_vars.variables, [])
+    secrets    = try(local.local_vars.secrets, [])
+    extra_tags = local.tags
+  }
+  ```
 
 # Example usage
 examples: |-
+  #### Manage org-level CI/CD variables and secrets
+
+  ```yaml
+  # inputs.yaml
+  variables:
+    - name: DOCKER_REGISTRY
+      value: "registry.example.com"
+      visibility: all
+    - name: DEPLOY_ENV
+      value: "production"
+      visibility: private
+
+  secrets:
+    - name: DOCKER_PASSWORD
+      value: "s3cr3t"
+      visibility: all
+    - name: NPM_TOKEN
+      value: "npm_xyz123"
+      visibility: selected
+  ```
 
 # How to get started quickly
 quickstart: |-
+  ```sh
+  mkdir -p prod/us-east-1/hub/github-org-management
+  cd prod/us-east-1/hub/github-org-management
+  terragrunt scaffold github.com/cloudopsworks/terraform-module-github-org-management
+  vi inputs.yaml   # populate variables and secrets lists
+  terragrunt apply
+  ```
 
 include:
   - "docs/targets.md"
