@@ -16,7 +16,7 @@ resource "github_actions_organization_secret" "org" {
   for_each        = { for secret in var.secrets : secret.name => secret }
   secret_name     = each.value.name
   visibility      = try(each.value.visibility, "private")
-  encrypted_value = data.sodium_encrypted_item.org[each.key].encrypted_value_base64
+  value_encrypted = data.sodium_encrypted_item.org[each.key].encrypted_value_base64
 }
 
 resource "github_actions_organization_variable" "org" {
