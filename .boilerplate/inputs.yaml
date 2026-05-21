@@ -2,6 +2,12 @@
 # All values here are module-specific; framework values (org, spoke_def, is_hub, extra_tags)
 # are injected automatically by the Terragrunt hierarchy.
 
+# (Required) GitHub provider configuration.
+# Used by the generated Terragrunt provider block to set the GitHub provider owner,
+# scoping all API calls to the specified organization.
+github:
+  org: ""  # (Required) GitHub organization name (e.g., "my-org"). Used as the provider owner.
+
 # (Optional) List of GitHub Actions organization-level variables to create.
 # Each entry is an object with the following attributes:
 #   name:       (Required) Name of the variable. Must be unique within the organization.
