@@ -83,6 +83,12 @@ terragrunt apply
 #### `inputs.yaml` — annotated example
 
 ```yaml
+# (Required) GitHub provider configuration.
+# Used by the generated Terragrunt provider block to set the GitHub provider owner,
+# scoping all API calls to the specified organization.
+github:
+  org: "my-org"  # (Required) GitHub organization name. Used as the provider owner.
+
 # (Optional) List of GitHub Actions organization-level variables to create.
 # Each entry is an object with the following attributes:
 #   name:       (Required) Name of the variable. Must be unique within the organization.
@@ -138,6 +144,18 @@ locals {
 
 include "root" {
   path = find_in_parent_folders("root.hcl")
+}
+
+# Generates the GitHub provider block using github.org from inputs.yaml.
+# github.org is REQUIRED in inputs.yaml for the provider to be configured correctly.
+generate "provider_github" {
+  path      = "provider.l.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+provider "github" {
+  owner = "${local.local_vars.github.org}"
+}
+EOF
 }
 
 terraform {
@@ -214,8 +232,8 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
-| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | >= 0.0.3 |
+| <a name="provider_github"></a> [github](#provider\_github) | 6.12.1 |
+| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | 0.0.3 |
 
 ## Modules
 
