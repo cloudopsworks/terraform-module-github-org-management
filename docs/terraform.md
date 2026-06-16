@@ -10,8 +10,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_github"></a> [github](#provider\_github) | ~> 6.0 |
-| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | >= 0.0.3 |
+| <a name="provider_github"></a> [github](#provider\_github) | 6.12.1 |
+| <a name="provider_sodium"></a> [sodium](#provider\_sodium) | 0.0.3 |
 
 ## Modules
 
