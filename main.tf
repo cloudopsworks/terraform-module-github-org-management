@@ -12,6 +12,12 @@ data "sodium_encrypted_item" "org" {
   content_base64    = base64encode(each.value.value)
 }
 
+data "sodium_encrypted_item" "dependabot" {
+  for_each          = { for secret in var.dependabot_secrets : secret.name => secret }
+  public_key_base64 = data.github_actions_organization_public_key.public_key.key
+  content_base64    = base64encode(each.value.value)
+}
+
 resource "github_actions_organization_secret" "org" {
   for_each        = { for secret in var.secrets : secret.name => secret }
   secret_name     = each.value.name
@@ -24,4 +30,11 @@ resource "github_actions_organization_variable" "org" {
   variable_name = each.value.name
   value         = each.value.value
   visibility    = try(each.value.visibility, "private")
+}
+
+resource "github_dependabot_organization_secret" "org" {
+  for_each        = { for secret in var.dependabot_secrets : secret.name => secret }
+  secret_name     = each.value.name
+  visibility      = try(each.value.visibility, "private")
+  value_encrypted = data.sodium_encrypted_item.dependabot[each.key].encrypted_value_base64
 }

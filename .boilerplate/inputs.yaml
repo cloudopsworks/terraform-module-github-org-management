@@ -34,3 +34,19 @@ secrets: []
 #   - name: MY_ORG_SECRET       # (Required) Secret name — unique within the org
 #     value: "my-secret-value"  # (Required) Plaintext value; encrypted via libsodium before upload
 #     visibility: private       # (Optional) "private" | "selected" | "all". Default: "private"
+
+# (Optional) List of GitHub Dependabot organization-level secrets to create.
+# Values are encrypted client-side using libsodium before being sent to the GitHub API.
+# These secrets are made available to Dependabot (dependency update) jobs, separate
+# from GitHub Actions secrets.
+# Each entry is an object with the following attributes:
+#   name:       (Required) Name of the secret. Must be unique within the organization.
+#   value:      (Required) Plaintext secret value — encrypted via libsodium before upload.
+#   visibility: (Optional) Visibility scope. Default: "private".
+#               Valid values: "private" | "selected" | "all"
+dependabot_secrets: []
+# Example:
+# dependabot_secrets:
+#   - name: DEPENDABOT_NPM_TOKEN  # (Required) Secret name — unique within the org
+#     value: "npm_xyz123"         # (Required) Plaintext value; encrypted via libsodium before upload
+#     visibility: private         # (Optional) "private" | "selected" | "all". Default: "private"

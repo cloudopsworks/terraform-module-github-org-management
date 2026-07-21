@@ -19,17 +19,18 @@ copyrights:
 github_repo: cloudopsworks/terraform-module-github-org-management
 
 description: |-
-  Terraform module for managing GitHub Actions organization-level secrets and variables.
+  Terraform module for managing GitHub Actions and Dependabot organization-level secrets and variables.
   Supports encrypted secret storage via libsodium and configurable visibility scopes.
 
 # Introduction to the project
 introduction: |-
-  This module provisions and manages **GitHub Actions organization-level variables** and
-  **secrets** using the [GitHub Terraform provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
+  This module provisions and manages **GitHub Actions organization-level variables**,
+  **GitHub Actions organization-level secrets**, and **Dependabot organization-level secrets**
+  using the [GitHub Terraform provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
 
-  Secrets are encrypted client-side using [libsodium](https://doc.libsodium.org/) via the
-  `killmeplz/sodium` provider before being uploaded to the GitHub API, ensuring values
-  are never transmitted in plaintext.
+  Both Actions and Dependabot secrets are encrypted client-side using
+  [libsodium](https://doc.libsodium.org/) via the `killmeplz/sodium` provider before being
+  uploaded to the GitHub API, ensuring values are never transmitted in plaintext.
 
   Each variable and secret supports a configurable `visibility` scope (`private`, `selected`,
   or `all`) to control which repositories within the organization can access them.
@@ -88,6 +89,22 @@ usage: |-
   #   - name: MY_ORG_SECRET       # (Required) Secret name — unique within the org
   #     value: "my-secret-value"  # (Required) Plaintext value; encrypted via libsodium before upload
   #     visibility: private       # (Optional) "private" | "selected" | "all". Default: "private"
+
+  # (Optional) List of GitHub Dependabot organization-level secrets to create.
+  # Values are encrypted client-side using libsodium before being sent to the GitHub API.
+  # These secrets are made available to Dependabot (dependency update) jobs, separate
+  # from GitHub Actions secrets.
+  # Each entry is an object with the following attributes:
+  #   name:       (Required) Name of the secret. Must be unique within the organization.
+  #   value:      (Required) Plaintext secret value — encrypted via libsodium before upload.
+  #   visibility: (Optional) Visibility scope. Default: "private".
+  #               Valid values: "private" | "selected" | "all"
+  dependabot_secrets: []
+  # Example:
+  # dependabot_secrets:
+  #   - name: DEPENDABOT_NPM_TOKEN  # (Required) Secret name — unique within the org
+  #     value: "npm_xyz123"         # (Required) Plaintext value; encrypted via libsodium before upload
+  #     visibility: private         # (Optional) "private" | "selected" | "all". Default: "private"
   ```
 
   #### Generated `terragrunt.hcl`
@@ -136,12 +153,13 @@ usage: |-
   }
 
   inputs = {
-    is_hub     = false
-    org        = local.env_vars.org
-    spoke_def  = local.spoke_vars.spoke
-    variables  = try(local.local_vars.variables, [])
-    secrets    = try(local.local_vars.secrets, [])
-    extra_tags = local.tags
+    is_hub             = false
+    org                = local.env_vars.org
+    spoke_def          = local.spoke_vars.spoke
+    variables          = try(local.local_vars.variables, [])
+    secrets            = try(local.local_vars.secrets, [])
+    dependabot_secrets = try(local.local_vars.dependabot_secrets, [])
+    extra_tags         = local.tags
   }
   ```
 
@@ -165,6 +183,19 @@ examples: |-
       visibility: all
     - name: NPM_TOKEN
       value: "npm_xyz123"
+      visibility: selected
+  ```
+
+  #### Manage Dependabot org-level secrets
+
+  ```yaml
+  # inputs.yaml
+  dependabot_secrets:
+    - name: DEPENDABOT_NPM_TOKEN
+      value: "npm_xyz123"
+      visibility: all
+    - name: DEPENDABOT_PRIVATE_REGISTRY_TOKEN
+      value: "s3cr3t"
       visibility: selected
   ```
 

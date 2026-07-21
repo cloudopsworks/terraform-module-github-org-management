@@ -15,7 +15,7 @@
  [![Latest Release](https://img.shields.io/github/release/cloudopsworks/terraform-module-github-org-management.svg?style=for-the-badge)](https://github.com/cloudopsworks/terraform-module-github-org-management/releases/latest) [![Last Updated](https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-github-org-management.svg?style=for-the-badge)](https://github.com/cloudopsworks/terraform-module-github-org-management/commits)
 
 
-Terraform module for managing GitHub Actions organization-level secrets and variables.
+Terraform module for managing GitHub Actions and Dependabot organization-level secrets and variables.
 Supports encrypted secret storage via libsodium and configurable visibility scopes.
 
 
@@ -46,12 +46,13 @@ We have [*lots of terraform modules*][terraform_modules] that are Open Source an
 
 ## Introduction
 
-This module provisions and manages **GitHub Actions organization-level variables** and
-**secrets** using the [GitHub Terraform provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
+This module provisions and manages **GitHub Actions organization-level variables**,
+**GitHub Actions organization-level secrets**, and **Dependabot organization-level secrets**
+using the [GitHub Terraform provider](https://registry.terraform.io/providers/integrations/github/latest/docs).
 
-Secrets are encrypted client-side using [libsodium](https://doc.libsodium.org/) via the
-`killmeplz/sodium` provider before being uploaded to the GitHub API, ensuring values
-are never transmitted in plaintext.
+Both Actions and Dependabot secrets are encrypted client-side using
+[libsodium](https://doc.libsodium.org/) via the `killmeplz/sodium` provider before being
+uploaded to the GitHub API, ensuring values are never transmitted in plaintext.
 
 Each variable and secret supports a configurable `visibility` scope (`private`, `selected`,
 or `all`) to control which repositories within the organization can access them.
@@ -115,6 +116,22 @@ secrets: []
 #   - name: MY_ORG_SECRET       # (Required) Secret name — unique within the org
 #     value: "my-secret-value"  # (Required) Plaintext value; encrypted via libsodium before upload
 #     visibility: private       # (Optional) "private" | "selected" | "all". Default: "private"
+
+# (Optional) List of GitHub Dependabot organization-level secrets to create.
+# Values are encrypted client-side using libsodium before being sent to the GitHub API.
+# These secrets are made available to Dependabot (dependency update) jobs, separate
+# from GitHub Actions secrets.
+# Each entry is an object with the following attributes:
+#   name:       (Required) Name of the secret. Must be unique within the organization.
+#   value:      (Required) Plaintext secret value — encrypted via libsodium before upload.
+#   visibility: (Optional) Visibility scope. Default: "private".
+#               Valid values: "private" | "selected" | "all"
+dependabot_secrets: []
+# Example:
+# dependabot_secrets:
+#   - name: DEPENDABOT_NPM_TOKEN  # (Required) Secret name — unique within the org
+#     value: "npm_xyz123"         # (Required) Plaintext value; encrypted via libsodium before upload
+#     visibility: private         # (Optional) "private" | "selected" | "all". Default: "private"
 ```
 
 #### Generated `terragrunt.hcl`
@@ -163,12 +180,13 @@ terraform {
 }
 
 inputs = {
-  is_hub     = false
-  org        = local.env_vars.org
-  spoke_def  = local.spoke_vars.spoke
-  variables  = try(local.local_vars.variables, [])
-  secrets    = try(local.local_vars.secrets, [])
-  extra_tags = local.tags
+  is_hub             = false
+  org                = local.env_vars.org
+  spoke_def          = local.spoke_vars.spoke
+  variables          = try(local.local_vars.variables, [])
+  secrets            = try(local.local_vars.secrets, [])
+  dependabot_secrets = try(local.local_vars.dependabot_secrets, [])
+  extra_tags         = local.tags
 }
 ```
 
@@ -203,6 +221,19 @@ secrets:
     visibility: all
   - name: NPM_TOKEN
     value: "npm_xyz123"
+    visibility: selected
+```
+
+#### Manage Dependabot org-level secrets
+
+```yaml
+# inputs.yaml
+dependabot_secrets:
+  - name: DEPENDABOT_NPM_TOKEN
+    value: "npm_xyz123"
+    visibility: all
+  - name: DEPENDABOT_PRIVATE_REGISTRY_TOKEN
+    value: "s3cr3t"
     visibility: selected
 ```
 
@@ -247,13 +278,16 @@ Available targets:
 |------|------|
 | [github_actions_organization_secret.org](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_organization_secret) | resource |
 | [github_actions_organization_variable.org](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_organization_variable) | resource |
+| [github_dependabot_organization_secret.org](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/dependabot_organization_secret) | resource |
 | [github_actions_organization_public_key.public_key](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/actions_organization_public_key) | data source |
+| [sodium_encrypted_item.dependabot](https://registry.terraform.io/providers/killmeplz/sodium/latest/docs/data-sources/encrypted_item) | data source |
 | [sodium_encrypted_item.org](https://registry.terraform.io/providers/killmeplz/sodium/latest/docs/data-sources/encrypted_item) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_dependabot_secrets"></a> [dependabot\_secrets](#input\_dependabot\_secrets) | List of GitHub Dependabot organization-level secrets to create. Values are encrypted client-side via libsodium. Each entry requires name and value; visibility defaults to 'private'. | `any` | `[]` | no |
 | <a name="input_extra_tags"></a> [extra\_tags](#input\_extra\_tags) | n/a | `map(string)` | `{}` | no |
 | <a name="input_is_hub"></a> [is\_hub](#input\_is\_hub) | Establish this is a HUB or spoke configuration | `bool` | `false` | no |
 | <a name="input_org"></a> [org](#input\_org) | n/a | <pre>object({<br/>    organization_name = string<br/>    organization_unit = string<br/>    environment_type  = string<br/>    environment_name  = string<br/>  })</pre> | n/a | yes |

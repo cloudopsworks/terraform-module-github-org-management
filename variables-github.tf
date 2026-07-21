@@ -31,3 +31,16 @@ variable "secrets" {
   type        = any
   default     = []
 }
+
+# List of GitHub Dependabot organization-level secrets.
+# Values are encrypted client-side via libsodium before upload to the GitHub API.
+# Each object accepts:
+#   name:       (Required) Secret name — must be unique within the organization.
+#   value:      (Required) Plaintext secret value; encrypted via libsodium before upload.
+#   visibility: (Optional) Which repositories can access this secret.
+#               Valid values: "private" | "selected" | "all". Default: "private".
+variable "dependabot_secrets" {
+  description = "List of GitHub Dependabot organization-level secrets to create. Values are encrypted client-side via libsodium. Each entry requires name and value; visibility defaults to 'private'."
+  type        = any
+  default     = []
+}
