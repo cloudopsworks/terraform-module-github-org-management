@@ -31,3 +31,9 @@ variable "secrets" {
   type        = any
   default     = []
 }
+
+variable "dependabot_secrets" {
+  description = "List of GitHub Dependabot organization-level secrets to create. Values are encrypted client-side via libsodium. Each entry requires name and value; visibility defaults to 'private'."
+  type        = any
+  default     = []
+}
